@@ -93,26 +93,59 @@ function updateTransform() {
     solarSystem.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoomLevel})`;
 }
 
-// 1. Lắng nghe sự kiện kéo chuột trên vùng không gian nền
-galaxyContainer.addEventListener('mousedown', (e) => {
-    // Chỉ kích hoạt kéo khi click vào nền trống (galaxyContainer) hoặc tâm hệ mặt trời, tránh click nhầm nút/hành tinh
+// --- HỆ THỐNG KÉO THẢ TỐI ƯU (HỖ TRỢ CẢ PC & MOBILE) ---
+
+// 1. Hàm bắt đầu kéo (Chạm vào màn hình hoặc click chuột)
+function startDrag(e) {
+    // Chỉ kích hoạt kéo khi click/chạm vào nền trống hoặc tâm hệ mặt trời
     if (e.target === galaxyContainer || e.target === solarSystem) {
         isDragging = true;
-        startX = e.clientX - offsetX;
-        startY = e.clientY - offsetY;
+        
+        // Lấy tọa độ thông minh: Nhận diện xem là Touch (điện thoại) hay Mouse (PC)
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX - offsetX;
+        startY = clientY - offsetY;
+        
+        galaxyContainer.style.cursor = 'grabbing';
     }
-});
+}
 
-window.addEventListener('mousemove', (e) => {
+// 2. Hàm đang kéo (Lướt tay trên màn hình hoặc di chuột)
+function doDrag(e) {
     if (!isDragging) return;
-    offsetX = e.clientX - startX;
-    offsetY = e.clientY - startY;
-    updateTransform();
-});
+    
+    // Ngăn chặn các hành động vuốt mặc định của điện thoại gây giật lag
+    if (e.cancelable) {
+        e.preventDefault(); 
+    }
 
-window.addEventListener('mouseup', () => {
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    
+    offsetX = clientX - startX;
+    offsetY = clientY - startY;
+    
+    // Dùng requestAnimationFrame để vẽ lại đồ họa siêu mượt (60FPS)
+    requestAnimationFrame(updateTransform);
+}
+
+// 3. Hàm kết thúc kéo (Buông tay hoặc nhả chuột)
+function endDrag() {
     isDragging = false;
-});
+    galaxyContainer.style.cursor = 'grab';
+}
+
+// === GẮN SỰ KIỆN CHO CHUỘT (DÀNH CHO MÁY TÍNH) ===
+galaxyContainer.addEventListener('mousedown', startDrag);
+window.addEventListener('mousemove', doDrag); 
+window.addEventListener('mouseup', endDrag);
+
+// === GẮN SỰ KIỆN CẢM ỨNG (DÀNH CHO ĐIỆN THOẠI/TABLET) ===
+galaxyContainer.addEventListener('touchstart', startDrag, { passive: false });
+window.addEventListener('touchmove', doDrag, { passive: false });
+window.addEventListener('touchend', endDrag);
 
 // 2. Logic cho bộ nút Zoom
 document.getElementById('zoom-in').addEventListener('click', (e) => {
