@@ -314,6 +314,31 @@ playPauseBtn.addEventListener('click', (e) => {
 closeBtn.addEventListener('click', () => infoPanel.classList.add('hidden'));
 document.body.addEventListener('click', () => infoPanel.classList.add('hidden'));
 
+// --- TỰ ĐỘNG CĂN CHỈNH KÍCH THƯỚC CHO ĐIỆN THOẠI ---
+window.addEventListener('load', () => {
+    // Nếu chiều rộng màn hình nhỏ hơn 768px (thường là điện thoại/tablet nhỏ)
+    if (window.innerWidth <= 768) {
+        zoomLevel = 0.4; // Thu nhỏ hệ mặt trời xuống còn 40% (Bạn có thể chỉnh 0.3 - 0.6 tùy ý)
+        updateTransform(); // Cập nhật lại giao diện ngay lập tức
+    }
+});
+// --- TẢI TRƯỚC HÌNH ẢNH (PRELOAD) ĐỂ TRÁNH GIẬT LAG ---
+function preloadImages() {
+    // Gộp tất cả dữ liệu lại (đảm bảo tên biến khớp với code của bạn nhé)
+    const allCelestialBodies = [sunData, moonData, ...planetsData];
+    
+    // Duyệt qua từng hành tinh, nếu có ảnh thì ép trình duyệt tải ngầm trước
+    allCelestialBodies.forEach(body => {
+        if (body.image) {
+            const img = new Image();
+            img.src = body.image;
+        }
+    });
+}
+
+// Chạy hàm tải trước ngay khi web vừa khởi động
+preloadImages();
+
 // Khởi chạy
 createStars();
 initSolarSystem();
