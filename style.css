@@ -1,0 +1,369 @@
+/* Khởi tạo cơ bản */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #010103;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Nền vũ trụ */
+#universe {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    background-color: #ffffff;
+    border-radius: 50%;
+    animation: blink var(--duration) infinite ease-in-out;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+}
+
+/* Nút điều khiển Play/Pause */
+#play-pause-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+#play-pause-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+/* GIAO DIỆN BỘ NÚT ZOOM (Xếp dọc dưới nút Tạm dừng) */
+#zoom-controls {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#zoom-controls button {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+#zoom-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Khung chứa hệ mặt trời */
+.galaxy-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    cursor: grab;        /* Biến con trỏ chuột thành hình bàn tay mở để kéo */
+    user-select: none;   /* Ngăn bôi đen văn bản/hình ảnh khi đang kéo chuột */
+}
+
+/* Khi đang nhấn giữ chuột để kéo */
+.galaxy-container:active {
+    cursor: grabbing;    /* Biến thành bàn tay nắm chặt */
+}
+
+/* THÊM TRANSITION CHO SOLAR-SYSTEM ĐỂ ZOOM MƯỢT MÀ */
+.solar-system {
+    position: relative;
+    width: 900px;
+    height: 900px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease-out; /* Tạo hiệu ứng chuyển đổi mượt khi thu phóng */
+}
+
+/* Mặt Trời phát sáng */
+.sun {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle at 50% 50%, #fffdf0 0%, #ffdd00 35%, #ff4500 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px #ff4500, 0 0 80px #ffaa00;
+    z-index: 10;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    pointer-events: auto;
+}
+
+.sun:hover {
+    transform: scale(1.1);
+}
+
+/* ĐƯỜNG QUỸ ĐẠO */
+.orbit {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.200);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* Container xử lý xoay tròn */
+.planet-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: orbit-rotate var(--orbit-speed) linear infinite;
+    pointer-events: none;
+}
+
+/* Khi class này được kích hoạt, mọi thứ dừng quay */
+.paused .planet-container, .paused .moon-container {
+    animation-play-state: paused;
+}
+
+@keyframes orbit-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* THÂN HÀNH TINH CHUNG */
+.planet {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: inset 3px 3px 6px rgba(255, 255, 255, 0.3), inset -5px -5px 12px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+}
+
+.planet:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* ĐỊNH NGHĨA TRÁI ĐẤT */
+.earth-planet {
+    top: 50%;
+    background: radial-gradient(circle at 30% 30%, 
+        #ffffff 0%,   
+        #6ac5fe 10%,  
+        #1b6fdf 30%,  
+        #279f27 45%,  
+        #1a801a 60%,  
+        #0b3d91 80%,  
+        #041e42 100%); 
+    box-shadow: 
+        inset 4px 4px 8px rgba(255, 255, 255, 0.4), 
+        inset -6px -6px 15px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(66, 133, 244, 0.3); 
+}
+
+/* MẶT TRĂNG VÀ CỤM TRÁI ĐẤT (ĐÃ SỬA LỖI LỆCH) */
+.earth-group {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+}
+
+.moon-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 45px;
+    height: 45px;
+    transform: translate(-50%, -50%);
+    border: 1px dashed rgba(255, 255, 255, 0.200);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.moon-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: orbit-rotate 15s linear infinite;
+}
+
+.moon-planet {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 30% 30%, #e0e0e0, #888888);
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.4), inset -1px -1px 3px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.moon-planet:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+/* Vành đai */
+.ring {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotateX(75deg);
+    pointer-events: none;
+}
+
+/* Bảng thông tin chi tiết */
+#info-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    background: rgba(10, 15, 30, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s;
+}
+
+#info-panel.hidden {
+    transform: translateX(390px);
+    opacity: 0;
+}
+
+#close-btn {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+#close-btn:hover { color: #fff; }
+
+#p-name {
+    font-size: 24px;
+    color: #4fc3f7;
+    margin-bottom: 2px;
+}
+
+.scientific-name {
+    font-size: 13px;
+    color: #b0bec5;
+    margin-bottom: 15px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, #4fc3f7, transparent);
+    margin-bottom: 15px;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table td {
+    padding: 8px 0;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.info-table td:first-child {
+    color: #81c784;
+    font-weight: 600;
+    width: 130px;
+}
+/* --- KHU VỰC CHỨA ẢNH HÀNH TINH (BẢN FULL HÌNH) --- */
+.planet-img-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px; /* Thu nhỏ padding để nhường chỗ cho ảnh to hơn */
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+/* Khung chứa ảnh: Chuyển từ hình tròn thành hình chữ nhật góc bo nhẹ */
+.img-cut-box {
+    width: 100%;
+    height: 150px; /* Chiều cao hiển thị ảnh */
+    border-radius: 6px; /* Bo góc nhẹ cho hợp với giao diện, không làm tròn xoe nữa */
+    overflow: hidden;
+    position: relative;
+}
+
+#p-img {
+    width: 100%;
+    height: 100%;
+    
+    /* THUỘC TÍNH QUAN TRỌNG: Giúp thu nhỏ/phóng to vừa vặn để hiện FULL toàn bộ ảnh gốc */
+    object-fit: contain; 
+    
+    /* ĐƯA SCALE VỀ NGUYÊN BẢN (Không phóng to ăn gian nữa) */
+    transform: scale(1); 
+    
+    transition: transform 0.3s ease;
+}
+
+/* Hiệu ứng zoom nhẹ khi di chuột vào ảnh full */
+.img-cut-box:hover #p-img {
+    transform: scale(1.05); 
+}

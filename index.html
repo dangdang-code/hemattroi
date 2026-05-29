@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Mặt Trời 2D Tương Tác</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="universe"></div>
+
+    <button id="play-pause-btn">⏸ Tạm dừng</button>
+
+    <div id="zoom-controls">
+        <button id="zoom-in" title="Phóng to">➕</button>
+        <button id="zoom-out" title="Thu nhỏ">➖</button>
+        <button id="zoom-reset" title="Đặt lại cấu hình">🔄</button>
+    </div>
+
+    <div class="galaxy-container">
+        <div class="solar-system" id="solar-system">
+            <div class="sun" data-name="Mặt Trời"></div>
+        </div>
+    </div>
+
+    <div id="info-panel" class="hidden">
+        <button id="close-btn">&times;</button>
+        <div class="panel-content">
+            <h2 id="p-name">Tên hành tinh</h2>
+            <p class="scientific-name"><i>Scientific Name: <span id="p-sci-name">-</span></i></p>
+            
+            <div class="planet-img-container">
+                <img id="p-img" src="" alt="Hình ảnh hành tinh">
+            </div>
+            
+            <hr>
+            <table class="info-table">
+                <tr><td>Vị trí:</td><td id="p-pos">-</td></tr>
+                <tr><td>Chu kỳ quỹ đạo:</td><td id="p-orbit">-</td></tr>
+                <tr><td>Khí quyển:</td><td id="p-atmosphere">-</td></tr>
+                <tr><td>Nhiệt độ:</td><td id="p-temp">-</td></tr>
+                <tr><td>Khối lượng:</td><td id="p-mass">-</td></tr>
+                <tr><td>Đường kính:</td><td id="p-diameter">-</td></tr>
+                <tr><td>Vành đai:</td><td id="p-rings">-</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
