@@ -93,56 +93,95 @@ function updateTransform() {
     solarSystem.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoomLevel})`;
 }
 
-// --- HỆ THỐNG KÉO THẢ TỐI ƯU (HỖ TRỢ CẢ PC & MOBILE) ---
+// --- HỆ THỐNG KÉO THẢ & ZOOM ĐA ĐIỂM (PINCH-TO-ZOOM) DÀNH CHO MOBILE & PC ---
 
-// 1. Hàm bắt đầu kéo (Chạm vào màn hình hoặc click chuột)
+let initialPinchDistance = null; // Biến lưu khoảng cách 2 ngón tay ban đầu
+
+// Hàm tính khoảng cách giữa 2 ngón tay bằng định lý Pytago
+function getDistance(touch1, touch2) {
+    return Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+}
+
+// 1. Bắt đầu chạm
 function startDrag(e) {
-    // Chỉ kích hoạt kéo khi click/chạm vào nền trống hoặc tâm hệ mặt trời
     if (e.target === galaxyContainer || e.target === solarSystem) {
-        isDragging = true;
-        
-        // Lấy tọa độ thông minh: Nhận diện xem là Touch (điện thoại) hay Mouse (PC)
-        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-        
-        startX = clientX - offsetX;
-        startY = clientY - offsetY;
-        
-        galaxyContainer.style.cursor = 'grabbing';
+        if (e.type.includes('touch')) {
+            if (e.touches.length === 1) {
+                // Chạm 1 ngón: Kéo thả di chuyển
+                isDragging = true;
+                startX = e.touches[0].clientX - offsetX;
+                startY = e.touches[0].clientY - offsetY;
+            } else if (e.touches.length === 2) {
+                // Chạm 2 ngón: Bắt đầu quá trình Zoom
+                isDragging = false; // Phải tắt kéo thả để tránh hệ thống bị loạn
+                initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+            }
+        } else {
+            // Click chuột PC
+            isDragging = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+            galaxyContainer.style.cursor = 'grabbing';
+        }
     }
 }
 
-// 2. Hàm đang kéo (Lướt tay trên màn hình hoặc di chuột)
+// 2. Quá trình vuốt/rê chuột
 function doDrag(e) {
-    if (!isDragging) return;
-    
-    // Ngăn chặn các hành động vuốt mặc định của điện thoại gây giật lag
     if (e.cancelable) {
-        e.preventDefault(); 
+        e.preventDefault(); // Chống hành động cuộn/zoom mặc định của điện thoại
     }
 
-    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    
-    offsetX = clientX - startX;
-    offsetY = clientY - startY;
-    
-    // Dùng requestAnimationFrame để vẽ lại đồ họa siêu mượt (60FPS)
-    requestAnimationFrame(updateTransform);
+    if (e.type.includes('touch')) {
+        if (e.touches.length === 1 && isDragging) {
+            // Đang vuốt 1 ngón: Di chuyển vũ trụ
+            offsetX = e.touches[0].clientX - startX;
+            offsetY = e.touches[0].clientY - startY;
+            requestAnimationFrame(updateTransform);
+        } else if (e.touches.length === 2 && initialPinchDistance !== null) {
+            // Đang vuốt 2 ngón: Zoom in / Zoom out
+            const currentDistance = getDistance(e.touches[0], e.touches[1]);
+            
+            // Tính toán mức độ chênh lệch khi 2 ngón tay kéo ra/thu vào
+            const diff = currentDistance - initialPinchDistance;
+            
+            // Tốc độ zoom (Bạn có thể tăng/giảm số 0.005 này để chỉnh độ nhạy)
+            const zoomSpeed = 0.005; 
+            zoomLevel += diff * zoomSpeed;
+
+            // Khóa giới hạn zoom: Ép zoomLevel không được vượt qua minZoom và maxZoom
+            zoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+            
+            // Cập nhật lại khoảng cách để đo tiếp cho khung hình (frame) tiếp theo
+            initialPinchDistance = currentDistance;
+            
+            requestAnimationFrame(updateTransform);
+        }
+    } else if (isDragging) {
+        // Đang rê chuột PC
+        offsetX = e.clientX - startX;
+        offsetY = e.clientY - startY;
+        requestAnimationFrame(updateTransform);
+    }
 }
 
-// 3. Hàm kết thúc kéo (Buông tay hoặc nhả chuột)
-function endDrag() {
+// 3. Kết thúc (nhấc tay hoặc buông chuột)
+function endDrag(e) {
     isDragging = false;
     galaxyContainer.style.cursor = 'grab';
+    
+    // Nếu nhấc 1 ngón lên trong khi đang zoom 2 ngón, reset lại hệ thống đo khoảng cách
+    if (e.type.includes('touch') && e.touches.length < 2) {
+        initialPinchDistance = null;
+    }
 }
 
-// === GẮN SỰ KIỆN CHO CHUỘT (DÀNH CHO MÁY TÍNH) ===
+// === GẮN SỰ KIỆN CHO CHUỘT (PC) ===
 galaxyContainer.addEventListener('mousedown', startDrag);
 window.addEventListener('mousemove', doDrag); 
 window.addEventListener('mouseup', endDrag);
 
-// === GẮN SỰ KIỆN CẢM ỨNG (DÀNH CHO ĐIỆN THOẠI/TABLET) ===
+// === GẮN SỰ KIỆN CHO CẢM ỨNG (MOBILE) ===
 galaxyContainer.addEventListener('touchstart', startDrag, { passive: false });
 window.addEventListener('touchmove', doDrag, { passive: false });
 window.addEventListener('touchend', endDrag);
