@@ -386,59 +386,160 @@ hr {
     transform: translate(-50%, -50%); 
 }
 
-/* Tương tự với các nút điều khiển (ví dụ nút Play/Pause) */
+/* =======================================================
+   GIAO DIỆN ĐIỀU KHIỂN & BẢNG THÔNG TIN (GLASSMORPHISM)
+======================================================== */
+
+/* Nút Play/Pause ở góc trái */
 #play-pause-btn {
     position: fixed;
+    top: 25px;
+    left: 25px; /* Đẩy dịch vào trong để tránh bị lẹm bởi góc bo màn hình */
     z-index: 1000;
-    /* Bạn có thể tự chỉnh bottom, right cho phù hợp với vị trí mong muốn */
-    bottom: 20px; 
-    right: 20px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08); /* Nền trong suốt nhẹ */
+    backdrop-filter: blur(10px); /* Làm mờ hậu cảnh vũ trụ phía sau nút */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Viền kính mảnh */
+    color: #ffffff;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
+/* Cụm nút Zoom xếp dọc nằm ngay dưới nút Play */
+#zoom-controls {
+    position: fixed;
+    top: 85px; /* Khoảng cách vừa vặn dưới nút Play */
+    left: 25px; /* Thẳng hàng hoàn hảo với nút Play bên trên */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Định dạng chung cho 3 nút bấm phóng to / thu nhỏ / reset */
+#zoom-controls button {
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+
+/* Hiệu ứng phản hồi khi di chuột hoặc chạm tay vào nút */
+#play-pause-btn:hover, #zoom-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.25); /* Hào quang nhẹ */
+    transform: translateY(-1px);
+}
+
+#play-pause-btn:active, #zoom-controls button:active {
+    transform: translateY(1px); /* Lún nhẹ xuống tạo cảm giác bấm thật */
+}
+
+/* Bảng thông tin hành tinh (Căn giữa màn hình tuyệt đối) */
+#info-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1010;
+    background: rgba(10, 15, 30, 0.95); /* Nền tối mờ sâu thẳm */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 12px;
+    color: #ffffff;
+    width: 400px; /* Chiều rộng mặc định trên PC */
+}
+
+/* Nút đóng bảng thông tin (Dấu X góc phải) */
 #close-btn {
-    position: absolute; /* Gắn liền với góc của bảng info-panel */
-    top: 10px;
+    position: absolute;
+    top: 12px;
     right: 15px;
-    z-index: 1001;
+    z-index: 1011;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#close-btn:hover {
+    color: #ff4a4a; /* Đổi sang màu đỏ nhẹ khi hover nút đóng */
 }
 
 /* =======================================================
-   TỐI ƯU KÍCH THƯỚC RIÊNG CHO ĐIỆN THOẠI (MEDIA QUERY)
+   TỐI ƯU RIÊNG CHO MÀN HÌNH ĐIỆN THOẠI (MEDIA QUERY)
 ======================================================== */
-
 @media screen and (max-width: 768px) {
-    /* 1. Ép bảng thông tin nhỏ lại vừa với điện thoại */
+    /* 1. Co giãn bảng thông tin thông minh trên mobile */
     #info-panel {
-        width: 90%; /* Thay vì rộng cố định 400px hay 500px, giờ nó sẽ chiếm 90% màn hình */
-        max-width: 350px;
+        width: 85%; /* Chiếm 85% chiều rộng điện thoại */
+        max-width: 340px;
         padding: 15px;
-        max-height: 85vh; /* Khống chế chiều cao không vượt quá 85% màn hình */
-        overflow-y: auto; /* Tự động hiện thanh cuộn nếu nội dung chữ quá dài */
-        border-radius: 12px;
+        max-height: 80vh; /* Không cho phép vượt quá 80% chiều cao màn hình */
+        overflow-y: auto; /* Hiện thanh cuộn nếu nội dung quá dài */
     }
 
-    /* 2. Thu nhỏ chữ trong bảng thông tin để đỡ chiếm chỗ */
+    /* 2. Thu nhỏ cỡ chữ giao diện */
     #info-panel h2 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         margin-bottom: 5px;
     }
     
     #info-panel p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         margin-bottom: 8px;
         line-height: 1.4;
     }
 
-    /* 3. Thu nhỏ khu vực ảnh hành tinh (Bản full ảnh lúc nãy) */
-    .img-cut-box {
-        height: 120px; /* Thu bớt chiều cao ảnh trên điện thoại */
+    /* 3. Khống chế kích thước ảnh hành tinh */
+    .planet-img-container {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+    }
+    
+    .planet-img-container img#p-img {
+        max-height: 100px; /* Ép chiều cao ảnh còn 100px trên mobile */
+        width: auto;
+        object-fit: contain;
     }
 
-    /* 4. Thu nhỏ nút bấm để không bị vướng tay */
-    #play-pause-btn {
-        bottom: 15px;
-        right: 15px;
-        transform: scale(0.85); /* Thu nhỏ nút còn 85% */
-        transform-origin: bottom right; /* Giữ điểm neo ở góc phải dưới */
+    /* 4. Tối ưu bảng thông số chi tiết */
+    .info-table {
+        width: 100%;
+        font-size: 0.85rem;
     }
+    
+    .info-table td {
+        padding: 4px 0; /* Thu hẹp dòng để tiết kiệm không gian */
+    }
+
+    /* 5. Thu nhỏ các nút bấm điều khiển trên Mobile để không chiếm không gian vuốt */
+    #zoom-controls, #play-pause-btn {
+        transform: scale(0.85);
+        left: 15px; /* Ép sát lề hơn một chút trên màn hình nhỏ */
+    }
+    
+    #play-pause-btn { top: 15px; }
+    #zoom-controls { top: 70px; }
 }
