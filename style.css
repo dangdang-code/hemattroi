@@ -20,6 +20,11 @@ body {
     width: 100%;
     height: 100%;
     z-index: 0;
+    
+    /* ĐÃ CHUYỂN 3 DÒNG NÀY VÀO BÊN TRONG NGOẶC NHỌN */
+    touch-action: none; /* Khóa hoàn toàn tính năng cuộn/zoom mặc định của trình duyệt */
+    user-select: none; /* Chống tình trạng vô tình bôi đen các thành phần khi đang vuốt */
+    cursor: grab;
 }
 
 .star {
